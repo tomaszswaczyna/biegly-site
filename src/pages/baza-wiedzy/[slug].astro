@@ -1,0 +1,205 @@
+---
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articles', ({ data }) => !data.draft);
+  return articles.map(a => ({ params: { slug: a.id }, props: { article: a } }));
+}
+
+const { article } = Astro.props;
+const { Content } = await render(article);
+
+const canonicalUrl = `https://bieglyofinansach.pl/baza-wiedzy/${article.id}`;
+const ogImage = article.data.heroImage
+  ? `https://bieglyofinansach.pl${article.data.heroImage}`
+  : 'https://bieglyofinansach.pl/images/og-default.png';
+---
+<Base title={`${article.data.title} — Tomasz Swaczyna`} description={article.data.description}>
+  <Fragment slot="head">
+    <!-- Open Graph -->
+    <meta property="og:type"        content="article" />
+    <meta property="og:title"       content={article.data.title} />
+    <meta property="og:description" content={article.data.description} />
+    <meta property="og:image"       content={ogImage} />
+    <meta property="og:url"         content={canonicalUrl} />
+    <meta property="og:locale"      content="pl_PL" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:title"       content={article.data.title} />
+    <meta name="twitter:description" content={article.data.description} />
+    <meta name="twitter:image"       content={ogImage} />
+    <!-- Canonical -->
+    <link rel="canonical" href={canonicalUrl} />
+  </Fragment>
+
+  <Nav />
+
+  <!-- HERO -->
+  <div class="article-hero">
+    {article.data.heroImage && (
+      <div class="hero-img-wrap">
+        <img src={article.data.heroImage} alt={article.data.title} class="hero-img" />
+        <div class="hero-img-overlay"></div>
+      </div>
+    )}
+    <div class="hero-content">
+      <div class="inner">
+        <a href="/baza-wiedzy" class="back-link">← Baza wiedzy</a>
+        <div class="art-tag">{article.data.tag}</div>
+        <h1>{article.data.title}</h1>
+        {article.data.heroSubtitle && (
+          <p class="hero-subtitle">{article.data.heroSubtitle}</p>
+        )}
+        <div class="art-meta">
+          <span class="art-date">📅 {article.data.date}</span>
+          {article.data.readingTime && (
+            <span class="art-read">⏱ {article.data.readingTime} czytania</span>
+          )}
+          {article.data.author && (
+            <span class="art-author">✍️ {article.data.author}</span>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHARE BAR -->
+  <div class="share-bar">
+    <div class="inner share-inner">
+      <span class="share-label">Udostępnij:</span>
+      <a href={`https://www.facebook.com/sharer/sharer.php?u=${canonicalUrl}`} target="_blank" rel="noopener" class="share-btn share-fb">Facebook</a>
+      <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${canonicalUrl}`} target="_blank" rel="noopener" class="share-btn share-li">LinkedIn</a>
+      <a href={`https://twitter.com/intent/tweet?url=${canonicalUrl}&text=${encodeURIComponent(article.data.title)}`} target="_blank" rel="noopener" class="share-btn share-tw">X / Twitter</a>
+      <button class="share-btn share-copy" id="copyBtn" data-url={canonicalUrl}>Kopiuj link</button>
+    </div>
+  </div>
+
+  <!-- ARTICLE BODY -->
+  <article class="article-body">
+    <div class="inner">
+      <Content />
+    </div>
+  </article>
+
+  <!-- AUTHOR BOX -->
+  {article.data.author && (
+    <div class="author-box">
+      <div class="inner author-inner">
+        <div class="author-avatar">TS</div>
+        <div class="author-info">
+          <strong>{article.data.author}</strong>
+          {article.data.authorTitle && <p>{article.data.authorTitle}</p>}
+          <a href="/#kontakt" class="author-cta">Skontaktuj się →</a>
+        </div>
+      </div>
+    </div>
+  )}
+
+  <!-- CTA -->
+  <div class="article-cta">
+    <div class="inner">
+      <h3>Masz pytania? Skontaktuj się</h3>
+      <p>Chętnie porozmawiam o szczegółach lub przygotuję ofertę indywidualną.</p>
+      <a href="/#kontakt" class="btn">Napisz do mnie →</a>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 <strong>Tomasz Swaczyna</strong> · bieglyofinansach.pl</p>
+  </footer>
+</Base>
+
+<script>
+  document.getElementById('copyBtn')?.addEventListener('click', (e) => {
+    const url = (e.currentTarget as HTMLButtonElement).dataset.url || location.href;
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = e.currentTarget as HTMLButtonElement;
+      btn.textContent = '✓ Skopiowano!';
+      setTimeout(() => btn.textContent = 'Kopiuj link', 2000);
+    });
+  });
+</script>
+
+<style>
+/* ── HERO ── */
+.article-hero { position: relative; min-height: 520px; display: flex; align-items: flex-end; overflow: hidden; }
+.hero-img-wrap { position: absolute; inset: 0; }
+.hero-img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.hero-img-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(13,27,42,.45) 0%, rgba(13,27,42,.85) 60%, rgba(13,27,42,.97) 100%); }
+.hero-content { position: relative; z-index: 2; width: 100%; padding: 140px 5% 60px; }
+.hero-content .inner { max-width: 860px; margin: 0 auto; }
+.back-link { color: rgba(255,255,255,.5); text-decoration: none; font-size: .85rem; display: inline-block; margin-bottom: 20px; transition: color .2s; }
+.back-link:hover { color: #c8a96e; }
+.art-tag { display: inline-block; background: rgba(200,169,110,.2); color: #c8a96e; font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 4px 12px; border-radius: 12px; margin-bottom: 16px; border: 1px solid rgba(200,169,110,.3); }
+.article-hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 3.8vw, 3rem); color: #fff; line-height: 1.2; margin-bottom: 16px; }
+.hero-subtitle { color: rgba(255,255,255,.75); font-size: 1.05rem; line-height: 1.6; margin-bottom: 20px; max-width: 700px; font-style: italic; }
+.art-meta { display: flex; flex-wrap: wrap; gap: 16px; }
+.art-meta span { color: rgba(255,255,255,.5); font-size: .82rem; }
+
+/* ── SHARE BAR ── */
+.share-bar { background: #f4f5f7; border-bottom: 1px solid #e4e9ee; padding: 12px 5%; }
+.share-inner { max-width: 860px; margin: 0 auto; display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.share-label { font-size: .78rem; font-weight: 700; color: #6b7f93; text-transform: uppercase; letter-spacing: .06em; margin-right: 4px; }
+.share-btn { display: inline-block; font-size: .78rem; font-weight: 600; padding: 6px 14px; border-radius: 6px; text-decoration: none; cursor: pointer; border: none; transition: opacity .2s; }
+.share-btn:hover { opacity: .8; }
+.share-fb { background: #1877f2; color: #fff; }
+.share-li { background: #0a66c2; color: #fff; }
+.share-tw { background: #000; color: #fff; }
+.share-copy { background: #1c2b3a; color: #fff; font-family: inherit; }
+
+/* ── ARTICLE BODY ── */
+.article-body { padding: 72px 5%; background: #fff; }
+.article-body .inner { max-width: 860px; margin: 0 auto; }
+
+.article-body :global(h2) { font-family: 'Playfair Display', serif; font-size: 1.65rem; color: #1c2b3a; margin: 48px 0 18px; padding-top: 8px; border-top: 2px solid #f0e8d8; }
+.article-body :global(h2:first-child) { border-top: none; margin-top: 0; }
+.article-body :global(h3) { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #1c2b3a; margin: 32px 0 12px; }
+.article-body :global(p) { color: #3a4f62; line-height: 1.9; margin-bottom: 22px; font-size: 1.02rem; text-align: justify; hyphens: auto; }
+.article-body :global(ul), .article-body :global(ol) { color: #3a4f62; line-height: 1.8; margin: 16px 0 22px 28px; }
+.article-body :global(li) { margin-bottom: 8px; font-size: 1.02rem; }
+.article-body :global(strong) { color: #1c2b3a; }
+.article-body :global(em) { color: #4a5f72; }
+.article-body :global(blockquote) { border-left: 3px solid #c8a96e; padding: 14px 22px; margin: 28px 0; background: #fdf9f3; border-radius: 0 6px 6px 0; }
+.article-body :global(blockquote p) { margin: 0; font-style: italic; color: #5a6e82; }
+.article-body :global(code) { background: #f0f2f5; padding: 2px 7px; border-radius: 4px; font-size: .88rem; }
+.article-body :global(hr) { border: none; border-top: 1px solid #e4e9ee; margin: 48px 0; }
+
+/* Grafiki inline */
+.article-body :global(img) {
+  display: block;
+  width: 100%;
+  max-width: 860px;
+  height: auto;
+  border-radius: 10px;
+  margin: 32px auto;
+  box-shadow: 0 4px 24px rgba(28,43,58,.1);
+}
+
+/* Tabele */
+.article-body :global(table) { width: 100%; border-collapse: collapse; margin: 28px 0; font-size: .92rem; }
+.article-body :global(th) { background: #1c2b3a; color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; }
+.article-body :global(td) { padding: 9px 14px; border-bottom: 1px solid #e4e9ee; color: #3a4f62; }
+.article-body :global(tr:nth-child(even) td) { background: #f9fafc; }
+.article-body :global(td:not(:first-child)), .article-body :global(th:not(:first-child)) { text-align: right; }
+
+/* ── AUTHOR BOX ── */
+.author-box { background: #f9fafc; border-top: 1px solid #e4e9ee; padding: 40px 5%; }
+.author-inner { max-width: 860px; margin: 0 auto; display: flex; gap: 24px; align-items: center; }
+.author-avatar { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #1c2b3a, #0d1b2a); color: #c8a96e; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; flex-shrink: 0; }
+.author-info strong { display: block; font-size: 1.05rem; color: #1c2b3a; margin-bottom: 4px; }
+.author-info p { color: #6b7f93; font-size: .88rem; margin-bottom: 10px; }
+.author-cta { color: #c8a96e; font-size: .85rem; font-weight: 600; text-decoration: none; }
+.author-cta:hover { text-decoration: underline; }
+
+/* ── CTA ── */
+.article-cta { background: #f4f5f7; padding: 64px 5%; text-align: center; }
+.article-cta .inner { max-width: 600px; margin: 0 auto; }
+.article-cta h3 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: #1c2b3a; margin-bottom: 10px; }
+.article-cta p { color: #6b7f93; margin-bottom: 24px; }
+.btn { background: #0d1b2a; color: #fff; padding: 13px 28px; border-radius: 6px; font-weight: 700; text-decoration: none; font-size: .9rem; }
+
+footer { background: #0d1b2a; color: rgba(255,255,255,.45); padding: 40px 5%; text-align: center; font-size: .82rem; }
+footer strong { color: #c8a96e; }
+</style>

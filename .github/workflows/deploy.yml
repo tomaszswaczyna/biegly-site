@@ -26,4 +26,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: da7928d0a87686dee076a46c9cd44b31
-          command: pages deploy dist --project-name biegly-site --branch main
+          command: pages deploy dist --project-name bieglyofinansach --branch main

@@ -1,0 +1,82 @@
+---
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
+import { getCollection } from 'astro:content';
+
+const allArticles = (await getCollection('articles', ({ data }) => !data.draft))
+  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+
+const tags = ['Wszystkie', ...new Set(allArticles.map(a => a.data.tag))];
+---
+<Base title="Baza wiedzy — Tomasz Swaczyna" description="Artykuły i analizy z zakresu finansów, inwestycji, blockchain i wycen przedsiębiorstw.">
+  <Nav />
+
+  <div class="page-hero">
+    <div class="inner">
+      <div class="page-tag">Baza wiedzy</div>
+      <h1>Artykuły &amp; Analizy</h1>
+      <p>Finanse, inwestycje, blockchain i prawo gospodarcze — piszę o tym, co ważne.</p>
+    </div>
+  </div>
+
+  <section class="articles-section">
+    <div class="inner">
+      {allArticles.length === 0 ? (
+        <div class="empty">
+          <span>📝</span>
+          <h3>Artykuły wkrótce</h3>
+          <p>Baza wiedzy jest w trakcie budowania. Wróć niedługo!</p>
+          <a href="/" class="btn-back">← Strona główna</a>
+        </div>
+      ) : (
+        <div class="grid">
+          {allArticles.map(a => (
+            <a href={`/baza-wiedzy/${a.id}`} class="card">
+              <div class="card-tag">{a.data.tag}</div>
+              <h2 class="card-title">{a.data.title}</h2>
+              <p class="card-desc">{a.data.description}</p>
+              <div class="card-meta">{a.data.date} · Czytaj →</div>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 <strong>Tomasz Swaczyna</strong> · bieglyofinansach.pl</p>
+  </footer>
+</Base>
+
+<style>
+.page-hero { background: linear-gradient(135deg, #0d1b2a 0%, #1a2e44 100%); padding: 140px 5% 80px; }
+.page-hero .inner { max-width: 1200px; margin: 0 auto; }
+.page-tag { font-size: .75rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #c8a96e; margin-bottom: 12px; }
+.page-hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4vw, 3rem); color: #fff; margin-bottom: 16px; }
+.page-hero p { color: rgba(255,255,255,.65); font-size: 1.05rem; max-width: 560px; line-height: 1.6; }
+
+.articles-section { padding: 80px 5%; background: #f4f5f7; min-height: 400px; }
+.articles-section .inner { max-width: 1200px; margin: 0 auto; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+
+.card { background: #fff; border-radius: 12px; padding: 28px 24px; text-decoration: none; color: inherit;
+  border: 1.5px solid #e4e9ee; transition: border-color .2s, box-shadow .2s; display: block; }
+.card:hover { border-color: #c8a96e; box-shadow: 0 8px 32px rgba(200,169,110,.12); }
+.card-tag { display: inline-block; background: rgba(200,169,110,.12); color: #c8a96e; font-size: .7rem;
+  font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 3px 10px; border-radius: 10px; margin-bottom: 14px; }
+.card-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #1c2b3a; line-height: 1.4; margin-bottom: 10px; }
+.card-desc { font-size: .85rem; color: #6b7f93; line-height: 1.6; margin-bottom: 16px; }
+.card-meta { font-size: .78rem; color: #c8a96e; font-weight: 600; }
+
+.empty { text-align: center; padding: 80px 20px; }
+.empty span { font-size: 3rem; display: block; margin-bottom: 20px; }
+.empty h3 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: #1c2b3a; margin-bottom: 10px; }
+.empty p { color: #6b7f93; margin-bottom: 28px; }
+.btn-back { background: #0d1b2a; color: #fff; padding: 12px 24px; border-radius: 6px; font-weight: 700; text-decoration: none; font-size: .9rem; }
+
+footer { background: #0d1b2a; color: rgba(255,255,255,.45); padding: 40px 5%; text-align: center; font-size: .82rem; }
+footer strong { color: #c8a96e; }
+
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+</style>

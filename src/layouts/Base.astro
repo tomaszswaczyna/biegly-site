@@ -1,0 +1,43 @@
+---
+export interface Props {
+  title?: string;
+  description?: string;
+}
+const {
+  title = 'Tomasz Swaczyna — Biegły o finansach',
+  description = 'Biegły sądowy ds. wyceny przedsiębiorstw. Ekspert blockchain i rynków cyfrowych. Doradztwo finansowe, opinie sądowe, inwestycje.',
+} = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content={description} />
+  <title>{title}</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet" />
+  <slot name="head" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy:   #0d1b2a;
+      --navy2:  #1a2e44;
+      --accent: #c8a96e;
+      --accent2:#e8c87e;
+      --white:  #ffffff;
+      --gray:   #f4f5f7;
+      --text:   #1c2b3a;
+      --muted:  #6b7f93;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; color: var(--text); background: var(--white); }
+  </style>
+  <!-- Cloudflare Web Analytics -->
+  <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "209406502ed6490dae60b89ecffe6af4"}'></script>
+  <!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+  <slot />
+</body>
+</html>
